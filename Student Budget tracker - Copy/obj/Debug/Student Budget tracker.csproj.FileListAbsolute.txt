@@ -1,7 +1,0 @@
-C:\Users\User\Documents\PRG172\Milestone 2 Budget tracker\Student Budget tracker\bin\Debug\Student Budget tracker.exe.config
-C:\Users\User\Documents\PRG172\Milestone 2 Budget tracker\Student Budget tracker\bin\Debug\Student Budget tracker.exe
-C:\Users\User\Documents\PRG172\Milestone 2 Budget tracker\Student Budget tracker\bin\Debug\Student Budget tracker.pdb
-C:\Users\User\Documents\PRG172\Milestone 2 Budget tracker\Student Budget tracker\obj\Debug\Student Budget tracker.csproj.AssemblyReference.cache
-C:\Users\User\Documents\PRG172\Milestone 2 Budget tracker\Student Budget tracker\obj\Debug\Student Budget tracker.csproj.CoreCompileInputs.cache
-C:\Users\User\Documents\PRG172\Milestone 2 Budget tracker\Student Budget tracker\obj\Debug\Student Budget tracker.exe
-C:\Users\User\Documents\PRG172\Milestone 2 Budget tracker\Student Budget tracker\obj\Debug\Student Budget tracker.pdb
