@@ -1,104 +1,4 @@
-<<<<<<< Updated upstream
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PRG_172_Project_2_Budget_Tracker
-{
-    internal class Program
-    {
-        static void Main(string[] args)
-        {
-            List<String> transactionTypes = new List<String>();
-            List<int> amount = new List<int>();
-            List<String> categories = new List<String>();
-            int totalIncome = 0;
-            int totalExpenses = 0;
-            int choice = 0;
-            string category;
-
-
-            while (choice != 5)
-            {
-                Console.WriteLine("1. Add Income ");
-                Console.WriteLine("2. Add Expense ");
-                Console.WriteLine("3  View Transaction ");
-                Console.WriteLine("4. Generate Summary ");
-                Console.WriteLine("5. Exit  ");
-
-
-                choice = Convert.ToInt32(Console.ReadLine());
-                switch (choice)
-                {
-                    case 1:
-                        Console.WriteLine(" Enter an Amount ");
-                        amount.Add(Convert.ToInt32(Console.ReadLine()));
-                        Console.WriteLine("Enter Category");
-                        categories.Add(Console.ReadLine());
-                        transactionTypes.Add("Income");
-                        // foreach (int run  in amount)
-                        // totalIncome = totalIncome + run;
-                        totalIncome = totalIncome + amount[amount.Count - 1];
-                        Console.WriteLine("You have successfully added an Amount.");
-                        break;
-                    case 2:
-                        Console.WriteLine(" Add an Expense ");
-                        //totalExpenses = Convert.ToInt32(Console.ReadLine());
-                        amount.Add(Convert.ToInt32(Console.ReadLine()));
-                        //you can do the same thing and remove the foreach
-                        Console.WriteLine("Enter Category");
-                        categories.Add(Console.ReadLine());
-                        transactionTypes.Add("Expense");
-                        totalExpenses = totalExpenses + amount[amount.Count - 1];
-                        //foreach (int run in amount)
-                        //    totalIncome = totalIncome + run;
-                        Console.WriteLine("You have successfully added an Expense.");
-                        break;
-                    case 3:
-                        if (transactionTypes.Count == 0)
-                        {
-                            Console.WriteLine("No transactions found");
-                        }
-                        else
-                        {
-                            for (int i = 0; i < transactionTypes.Count; i++)
-                            {
-                                Console.WriteLine(transactionTypes[i] + " | " + amount[i] + " | " + categories[i]);
-                            }
-                        }
-                        break;
-
-                    case 4:
-                        Console.WriteLine("Total Income: " + totalIncome);
-                        Console.WriteLine("Total Expenses: " + totalExpenses);
-                        Console.WriteLine("Balance: " + (totalIncome - totalExpenses));
-                        break;
-
-                    case 5:
-                        Console.WriteLine("Goodbye, have a great day! ");
-                        break;
-
-                    default:
-                        Console.WriteLine("Invalid option selected, please try again. ");
-                        break;
-
-
-
-
-
-
-                }
-
-            }
-        }
-    }
-}
-    
-    
-=======
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -119,7 +19,8 @@ namespace Student_Budget_tracker
                 Console.WriteLine("2. Add Expense");
                 Console.WriteLine("3. View Catagories");
                 Console.WriteLine("4. View Monthly total");
-                Console.WriteLine("5. Exit");
+                Console.WriteLine("5. Add Max Spending Limit");
+                Console.WriteLine("6. Exit");
 
                 int choice = Convert.ToInt32(Console.ReadLine()); // gets user input which is a int and stores it in choice
 
@@ -186,6 +87,7 @@ namespace Student_Budget_tracker
                         _transactions.Add(newTransaction);
                             Console.WriteLine("Expense Added");
 
+                        CheckSpendingLimit(); // checks if the expense is over the max limit
 
 
                         break;
@@ -194,10 +96,7 @@ namespace Student_Budget_tracker
 
                         Console.WriteLine("View Catagories"); // code to view catagories
 
-                        foreach (var transaction in _transactions) // helps us print out Rands for all the transactions
-                        {
-                            Console.WriteLine(transaction.Category + " R" + transaction.Amount);
-                        }
+                        ViewCatagories(); // this links to the catagory switch case section
 
                         break;
 
@@ -211,6 +110,15 @@ namespace Student_Budget_tracker
 
                     case 5:
 
+                        Console.WriteLine("Add Max Spending Limit"); // code to add max spending limit
+                        maxSpendingLimit = Convert.ToDouble(Console.ReadLine());
+                        Console.WriteLine("Max Spending Limit Added");
+                        CheckSpendingLimit(); // checks the spending limit straight away
+
+                        break;
+
+                    case 6:
+
 
                         Console.WriteLine("Exiting..."); // code to exit the program
                         running = false;// this will break the loop and end the program
@@ -218,7 +126,7 @@ namespace Student_Budget_tracker
 
                     default:
 
-                        Console.WriteLine("Incorrect choice. Please try again."); // code to handle invalid input such as a number that is not 1-5
+                        Console.WriteLine("Incorrect choice. Please try again."); // code to handle invalid input such as a number that is not 1-6
                         break;
                 }
 
@@ -245,7 +153,90 @@ namespace Student_Budget_tracker
             }
             double monthlyTotal = totalIncome - totalExpense;
             Console.WriteLine($"Monthly Total: {monthlyTotal}");
+            CheckSpendingLimit(); // checks if the user has gone over their limit
         }
+
+        ///this is the section for viewing the catagories with a switch statement ///
+        static void ViewCatagories()
+        {
+            Console.WriteLine("==== View Categories ====");
+            Console.WriteLine("1. Rent");
+            Console.WriteLine("2. Groceries");
+            Console.WriteLine("3. Entertainment");
+            Console.WriteLine("4. Transport");
+            Console.WriteLine("5. Student material");
+            Console.WriteLine("6. All Catagories");
+
+            int ViewCatagoryChoice = Convert.ToInt32(Console.ReadLine());
+
+            switch (ViewCatagoryChoice)
+            {
+                case 1:
+                    DisplayCatagoryTotal("Rent");
+                    break;
+                case 2:
+                    DisplayCatagoryTotal("Groceries");
+                    break;
+                case 3:
+                    DisplayCatagoryTotal("Entertainment");
+                    break;
+                case 4:
+                    DisplayCatagoryTotal("Transport");
+                    break;
+                case 5:
+                    DisplayCatagoryTotal("Student material");
+                    break;
+                case 6:
+                    foreach (var transaction in _transactions) // helps us print out Rands for all the transactions
+                    {
+                        Console.WriteLine(transaction.Category + " R" + transaction.Amount);
+                    }
+                    break;
+                default:
+                    Console.WriteLine("Invalid category. Please try again.");
+                    break;
+            }
+        }
+
+        ///this method prints the total for one catagory ///
+        static void DisplayCatagoryTotal(string catagoryName)
+        {
+            double catagoryTotal = 0;
+
+            foreach (var transaction in _transactions)
+            {
+                if (transaction.Category == catagoryName)
+                {
+                    catagoryTotal += transaction.Amount;
+                }
+            }
+
+            Console.WriteLine(catagoryName + " Total: R" + catagoryTotal);
+        }
+
+        ///this method checks if the user is over the max spending limit ///
+        static void CheckSpendingLimit()
+        {
+            double totalExpense = 0;
+
+            foreach (var transaction in _transactions)
+            {
+                if (transaction.type == "Expense")
+                {
+                    totalExpense += transaction.Amount;
+                }
+            }
+
+            if (maxSpendingLimit > 0 && totalExpense > maxSpendingLimit)
+            {
+                Console.WriteLine("WARNING: You have gone over your max spending limit!");
+            }
+            else if (maxSpendingLimit > 0 && totalExpense >= (maxSpendingLimit * 0.8))
+            {
+                Console.WriteLine("WARNING: You are close to your max spending limit!");
+            }
+        }
+
         ///////this section is where we'll use classes to create objects for the different catagories of income and expenses./////
 
         class Transaction      // this is a class that will be used to create objects for each transaction (income or expense) that the user adds. it has properties for the transaction id, category, and amount.
@@ -263,6 +254,7 @@ namespace Student_Budget_tracker
 
         //DO NOT FORGET TO MAKE IT STATIC OTHERWISE IT WONT WORK IN THE MAIN METHOD. this is because the main method is static and it can only access static members of the class. if we make the list of transactions static, then we can access it from the main method and add transactions to it.
         static List<Transaction> _transactions = new List<Transaction>();  // this is a list that will be used to store all the transactions that the user adds. it will be used to calculate the monthly total and to view the categories.hopefully :)
+        static double maxSpendingLimit = 0; // this will store the max spending limit for the user
 
         
 
@@ -272,4 +264,3 @@ namespace Student_Budget_tracker
     }  
 
 }
->>>>>>> Stashed changes
