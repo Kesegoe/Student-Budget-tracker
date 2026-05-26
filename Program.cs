@@ -1,266 +1,381 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Student_Budget_tracker
+
+
+namespace Student_Budget_Tracker
 {
     internal class Program
     {
+        // ── Shared application state ─────────────────────────────────
+        static List<Transaction> _transactions = new List<Transaction>();
+        static double _maxSpendingLimit = 0;
+        static int _nextId = 1; // auto-incrementing transaction ID
+
+        // ── Entry point ──────────────────────────────────────────────
         static void Main(string[] args)
         {
-            bool running = true; // allows us to  loop the program until the user chooses to exit
+
+            Console.WriteLine("---STUDENT BUDGET TRACKER---");
+
+            Console.Write("Enter your name: ");
+            string userName = Console.ReadLine();
+
+            bool running = true;
+
             while (running)
             {
-                Console.WriteLine("== Student Budget Tracker ==");
-                Console.WriteLine("1. Add Income");
-                Console.WriteLine("2. Add Expense");
-                Console.WriteLine("3. View Catagories");
-                Console.WriteLine("4. View Monthly total");
-                Console.WriteLine("5. Add Max Spending Limit");
-                Console.WriteLine("6. Exit");
+                ShowMainMenu(userName);
 
-                int choice = Convert.ToInt32(Console.ReadLine()); // gets user input which is a int and stores it in choice
+                int choice = GetValidInt("Enter choice (1-7): ");
 
                 switch (choice)
                 {
-
                     case 1:
-
-                        Console.WriteLine("Add Income");  // code to add income
-
-
-                        //further additions to the case statements are added 20:21 pm 24/05/2026
-                        Transaction newTransation = new Transaction();
-                        newTransation.type = "Income";
-                        newTransation.Category = "Income";
-                        newTransation.Amount = Convert.ToDouble(Console.ReadLine());
-                        _transactions.Add(newTransation);
-                        Console.WriteLine("Income Added");
-
-
+                        AddIncome(userName);
                         break;
 
                     case 2:
-
-                        Console.WriteLine("Add Expense"); // code to add expense
-
-                        //05:23AM changes to the case statements to add catagories //
-                        Transaction newTransaction =new Transaction();
-                        newTransaction.type = "Expense";
-                        ////////////////////////////////////////////
-                        Console.WriteLine("==== Expense Categories ====");
-                        Console.WriteLine("1. Rent");
-                        Console.WriteLine("2. Groceries");
-                        Console.WriteLine("3. Entertainment");
-                        Console.WriteLine("4. Transport");
-                        Console.WriteLine("5. Student material");
-
-                        int ChoiceCatagory = Convert.ToInt32(Console.ReadLine());
-
-                        switch (ChoiceCatagory)
-                        {
-                            case 1:
-                                newTransaction.Category = "Rent";
-                                break;
-                            case 2:
-                                newTransaction.Category = "Groceries";
-                                break;
-                            case 3:
-                                newTransaction.Category = "Entertainment";
-                                break;
-                            case 4:
-                                newTransaction.Category = "Transport";
-                                break;
-                            case 5:
-                                newTransaction.Category = "Student material";
-                                break;
-                            default:
-                                Console.WriteLine("Invalid category. Please try again.");
-                                break;
-                        }
-
-                        Console.WriteLine("Enter the amount of the expense: ");
-                        newTransaction.Amount = Convert.ToDouble(Console.ReadLine());
-                        _transactions.Add(newTransaction);
-                            Console.WriteLine("Expense Added");
-
-                        CheckSpendingLimit(); // checks if the expense is over the max limit
-
-
+                        AddExpense(userName);
                         break;
 
                     case 3:
-
-                        Console.WriteLine("View Catagories"); // code to view catagories
-
-                        ViewCatagories(); // this links to the catagory switch case section
-
+                        ViewCategories();
                         break;
 
                     case 4:
-
-                        Console.WriteLine("View Monthly total"); // code to view monthly total
-
-                        CalculateMonthlyTotal();  // links this back to the method added later
-
+                        CalculateMonthlyTotal();
                         break;
 
                     case 5:
-
-                        Console.WriteLine("Add Max Spending Limit"); // code to add max spending limit
-                        maxSpendingLimit = Convert.ToDouble(Console.ReadLine());
-                        Console.WriteLine("Max Spending Limit Added");
-                        CheckSpendingLimit(); // checks the spending limit straight away
-
+                        SetSpendingLimit();
                         break;
 
                     case 6:
+                        ViewAllTransactions();
+                        break;
 
-
-                        Console.WriteLine("Exiting..."); // code to exit the program
-                        running = false;// this will break the loop and end the program
+                    case 7:
+                        Console.WriteLine("\nExiting... Goodbye, " + userName + "!");
+                        running = false;
                         break;
 
                     default:
-
-                        Console.WriteLine("Incorrect choice. Please try again."); // code to handle invalid input such as a number that is not 1-6
+                        Console.WriteLine("\n[!] Invalid choice. Please enter a number between 1 and 7.\n");
                         break;
                 }
-
             }
         }
 
-        ///////this is the main menu of the program. itss made to loop until the user chooses to exit. it also has a switch statement to handle the different choices thee user can make. each case is a different option in the menu. the code for each option is not yet implemented, but it will be added later.
-       
-        ///im puting the methods for calcuculating the mothly totals ///
-        static void CalculateMonthlyTotal()// loops through the list and calculates the total
+        // ── Menus ─────────────────────────────────────────────────────
+
+        static void ShowMainMenu(string userName)
         {
-            double totalIncome = 0;
-            double totalExpense = 0;
-            foreach (var transaction in _transactions)
-            {
-                if (transaction.type == "Income")
-                {
-                    totalIncome += transaction.Amount;
-                }
-                else if (transaction.type == "Expense")
-                {
-                    totalExpense += transaction.Amount;
-                }
-            }
-            double monthlyTotal = totalIncome - totalExpense;
-            Console.WriteLine($"Monthly Total: {monthlyTotal}");
-            CheckSpendingLimit(); // checks if the user has gone over their limit
+
+            Console.WriteLine("  Hi, " + userName + "! What would you like to do?");
+            Console.WriteLine(" 1. Add Income");
+            Console.WriteLine(" 2. Add Expense");
+            Console.WriteLine(" 3. View Categories");
+            Console.WriteLine(" 4. View Monthly Total");
+            Console.WriteLine(" 5. Set Max Spending Limit");
+            Console.WriteLine(" 6. View All Transactions");
+            Console.WriteLine(" 7. Exit");
+            Console.WriteLine("-----------------------------------------");
         }
 
-        ///this is the section for viewing the catagories with a switch statement ///
-        static void ViewCatagories()
+        // ── Add Income ────────────────────────────────────────
+
+        static void AddIncome(string userName)
         {
-            Console.WriteLine("==== View Categories ====");
-            Console.WriteLine("1. Rent");
-            Console.WriteLine("2. Groceries");
-            Console.WriteLine("3. Entertainment");
-            Console.WriteLine("4. Transport");
-            Console.WriteLine("5. Student material");
-            Console.WriteLine("6. All Catagories");
+            Console.WriteLine("\n--- Add Income ---");
+            Console.Write("Enter a description (e.g. 'Part-time job'): ");
+            string description = Console.ReadLine();
 
-            int ViewCatagoryChoice = Convert.ToInt32(Console.ReadLine());
+            double amount = GetValidDouble("Enter income amount (R): ");
 
-            switch (ViewCatagoryChoice)
+            Transaction newTransaction = new Transaction
             {
-                case 1:
-                    DisplayCatagoryTotal("Rent");
-                    break;
-                case 2:
-                    DisplayCatagoryTotal("Groceries");
-                    break;
-                case 3:
-                    DisplayCatagoryTotal("Entertainment");
-                    break;
-                case 4:
-                    DisplayCatagoryTotal("Transport");
-                    break;
-                case 5:
-                    DisplayCatagoryTotal("Student material");
-                    break;
-                case 6:
-                    foreach (var transaction in _transactions) // helps us print out Rands for all the transactions
-                    {
-                        Console.WriteLine(transaction.Category + " R" + transaction.Amount);
-                    }
-                    break;
+                TransactionID = _nextId++,
+                UserName = userName,
+                Type = "Income",
+                Category = "Income",
+                Description = description,
+                Amount = amount,
+                Date = DateTime.Now
+            };
+
+            _transactions.Add(newTransaction);
+            Console.WriteLine("\n[+] Income of R" + amount.ToString("F2") + " added successfully!");
+        }
+
+        // ── Add Expense ───────────────────────────────────────
+
+        static void AddExpense(string userName)
+        {
+            Console.WriteLine("\n--- Add Expense ---");
+            Console.WriteLine("Select a category:");
+            Console.WriteLine(" 1. Rent");
+            Console.WriteLine(" 2. Groceries");
+            Console.WriteLine(" 3. Entertainment");
+            Console.WriteLine(" 4. Transport");
+            Console.WriteLine(" 5. Student Materials");
+
+            int categoryChoice = GetValidInt("Enter category (1-5): ");
+
+            string category;
+            switch (categoryChoice)
+            {
+                case 1: category = "Rent"; break;
+                case 2: category = "Groceries"; break;
+                case 3: category = "Entertainment"; break;
+                case 4: category = "Transport"; break;
+                case 5: category = "Student Materials"; break;
                 default:
-                    Console.WriteLine("Invalid category. Please try again.");
+                    Console.WriteLine("[!] Invalid category. Expense not added.");
+                    return; // exits the method early on invalid input
+            }
+
+            Console.Write("Enter a description (e.g. 'Woolworths run'): ");
+            string description = Console.ReadLine();
+
+            double amount = GetValidDouble("Enter expense amount (R): ");
+
+            Transaction newTransaction = new Transaction
+            {
+                TransactionID = _nextId++,
+                UserName = userName,
+                Type = "Expense",
+                Category = category,
+                Description = description,
+                Amount = amount,
+                Date = DateTime.Now
+            };
+
+            _transactions.Add(newTransaction);
+            Console.WriteLine("\n[-] Expense of R" + amount.ToString("F2") + " added under '" + category + "'.");
+
+            CheckSpendingLimit();
+        }
+
+        // ── View Categories ───────────────────────────────────
+
+        static void ViewCategories()
+        {
+            Console.WriteLine("\n--- View Categories ---");
+            Console.WriteLine(" 1. Rent");
+            Console.WriteLine(" 2. Groceries");
+            Console.WriteLine(" 3. Entertainment");
+            Console.WriteLine(" 4. Transport");
+            Console.WriteLine(" 5. Student Materials");
+            Console.WriteLine(" 6. All Categories");
+
+            int viewChoice = GetValidInt("Enter choice (1-6): ");
+
+            switch (viewChoice)
+            {
+                case 1: DisplayCategoryTotal("Rent"); break;
+                case 2: DisplayCategoryTotal("Groceries"); break;
+                case 3: DisplayCategoryTotal("Entertainment"); break;
+                case 4: DisplayCategoryTotal("Transport"); break;
+                case 5: DisplayCategoryTotal("Student Materials"); break;
+                case 6: DisplayAllCategories(); break;
+                default:
+                    Console.WriteLine("[!] Invalid choice.");
                     break;
             }
         }
 
-        ///this method prints the total for one catagory ///
-        static void DisplayCatagoryTotal(string catagoryName)
-        {
-            double catagoryTotal = 0;
+        // ── Monthly Total ─────────────────────────────────────
 
-            foreach (var transaction in _transactions)
+        static void CalculateMonthlyTotal()
+        {
+            Console.WriteLine("\n--- Monthly Total (" + DateTime.Now.ToString("MMMM yyyy") + ") ---");
+
+            // Only looks at transactions from the current month and year
+            var thisMonth = _transactions.Where(t =>
+                t.Date.Month == DateTime.Now.Month &&
+                t.Date.Year == DateTime.Now.Year).ToList();
+
+            if (!thisMonth.Any())
             {
-                if (transaction.Category == catagoryName)
-                {
-                    catagoryTotal += transaction.Amount;
-                }
+                Console.WriteLine("[!] No transactions found for this month.");
+                return;
             }
 
-            Console.WriteLine(catagoryName + " Total: R" + catagoryTotal);
+            double totalIncome = thisMonth.Where(t => t.Type == "Income").Sum(t => t.Amount);
+            double totalExpense = thisMonth.Where(t => t.Type == "Expense").Sum(t => t.Amount);
+            double balance = totalIncome - totalExpense;
+
+            Console.WriteLine("  Total Income  : R" + totalIncome.ToString("F2"));
+            Console.WriteLine("  Total Expenses: R" + totalExpense.ToString("F2"));
+            Console.WriteLine("  -----------------------------------");
+            Console.WriteLine("  Balance       : R" + balance.ToString("F2"));
+
+            if (balance < 0)
+                Console.WriteLine("  [!] Warning: You are spending more than you earn!");
+
+            CheckSpendingLimit();
         }
 
-        ///this method checks if the user is over the max spending limit ///
+        // ── Set Spending Limit ────────────────────────────────
+
+        static void SetSpendingLimit()
+        {
+            Console.WriteLine("\n--- Set Max Spending Limit ---");
+            _maxSpendingLimit = GetValidDouble("Enter your max spending limit (R): ");
+            Console.WriteLine("[+] Spending limit set to R" + _maxSpendingLimit.ToString("F2"));
+            CheckSpendingLimit(); // checks immediately after setting
+        }
+
+        // ── View All Transactions ─────────────────────────────
+
+        static void ViewAllTransactions()
+        {
+            Console.WriteLine("\n--- All Transactions ---");
+
+            if (!_transactions.Any())
+            {
+                Console.WriteLine("[!] No transactions recorded yet.");
+                return;
+            }
+
+            Console.WriteLine(
+                " {0,-4} {1,-12} {2,-18} {3,-22} {4,10}  {5}",
+                "ID", "Type", "Category", "Description", "Amount", "Date"
+            );
+            Console.WriteLine(new string('-', 85));
+
+            foreach (var t in _transactions)
+            {
+                string sign = t.Type == "Income" ? "+" : "-";
+                Console.WriteLine(
+                    " {0,-4} {1,-12} {2,-18} {3,-22} {4,10}  {5}",
+                    t.TransactionID,
+                    t.Type,
+                    t.Category,
+                    t.Description.Length > 20 ? t.Description.Substring(0, 20) : t.Description,
+                    sign + "R" + t.Amount.ToString("F2"),
+                    t.Date.ToString("dd/MM/yyyy HH:mm")
+                );
+            }
+        }
+
+        // ── Display total for one category ────────────────────
+
+        static void DisplayCategoryTotal(string categoryName)
+        {
+            var categoryTransactions = _transactions
+                .Where(t => t.Category == categoryName)
+                .ToList();
+
+            if (!categoryTransactions.Any())
+            {
+                Console.WriteLine("[!] No transactions found for '" + categoryName + "'.");
+                return;
+            }
+
+            double categoryTotal = categoryTransactions.Sum(t => t.Amount);
+            Console.WriteLine("\n  " + categoryName + " Total: R" + categoryTotal.ToString("F2"));
+            Console.WriteLine("  Transactions:");
+            foreach (var t in categoryTransactions)
+            {
+                Console.WriteLine(
+                    "    [ID {0}] {1} - R{2} on {3}",
+                    t.TransactionID,
+                    t.Description,
+                    t.Amount.ToString("F2"),
+                    t.Date.ToString("dd/MM/yyyy")
+                );
+            }
+        }
+
+        // ── Display totals for all expense categories ─────────
+
+        static void DisplayAllCategories()
+        {
+            string[] categories = { "Rent", "Groceries", "Entertainment", "Transport", "Student Materials" };
+
+            Console.WriteLine("\n  Category Breakdown:");
+            Console.WriteLine(new string('-', 35));
+
+            foreach (var cat in categories)
+            {
+                double total = _transactions
+                    .Where(t => t.Category == cat)
+                    .Sum(t => t.Amount);
+
+                Console.WriteLine("  {0,-20}: R{1}", cat, total.ToString("F2"));
+            }
+        }
+
+        // ── Check if spending limit has been exceeded ─────────
+
         static void CheckSpendingLimit()
         {
-            double totalExpense = 0;
+            if (_maxSpendingLimit <= 0) return; // no limit set, skip check
 
-            foreach (var transaction in _transactions)
-            {
-                if (transaction.type == "Expense")
-                {
-                    totalExpense += transaction.Amount;
-                }
-            }
+            double totalExpense = _transactions
+                .Where(t => t.Type == "Expense")
+                .Sum(t => t.Amount);
 
-            if (maxSpendingLimit > 0 && totalExpense > maxSpendingLimit)
+            double percentUsed = (totalExpense / _maxSpendingLimit) * 100;
+
+            if (totalExpense > _maxSpendingLimit)
             {
-                Console.WriteLine("WARNING: You have gone over your max spending limit!");
+                Console.WriteLine("\n  *** ALERT: You have exceeded your spending limit! ***");
+                Console.WriteLine("  Spent: R" + totalExpense.ToString("F2") +
+                                  " / Limit: R" + _maxSpendingLimit.ToString("F2"));
             }
-            else if (maxSpendingLimit > 0 && totalExpense >= (maxSpendingLimit * 0.8))
+            else if (totalExpense >= _maxSpendingLimit * 0.8)
             {
-                Console.WriteLine("WARNING: You are close to your max spending limit!");
+                Console.WriteLine("\n  [!] Warning: You have used " + percentUsed.ToString("F0") +
+                                  "% of your spending limit.");
+                Console.WriteLine("  Spent: R" + totalExpense.ToString("F2") +
+                                  " / Limit: R" + _maxSpendingLimit.ToString("F2"));
             }
         }
 
-        ///////this section is where we'll use classes to create objects for the different catagories of income and expenses./////
 
-        class Transaction      // this is a class that will be used to create objects for each transaction (income or expense) that the user adds. it has properties for the transaction id, category, and amount.
+
+        // Keeps asking until the user enters a valid integer
+        static int GetValidInt(string prompt)
         {
-            public string UserName { get; set; } // this will be for adding usernames
-            public int TransactionID { get; set; }// this will be used to uniquely identify each transaction
+            int result;
+            Console.Write(prompt);
+            while (!int.TryParse(Console.ReadLine(), out result))
+            {
+                Console.WriteLine("[!] Invalid input. Please enter a whole number.");
+                Console.Write(prompt);
+            }
+            return result;
+        }
 
-            public string type { get; set; } // this will be used to differentiate between income and expenses
-
-            public string Category { get; set; }// this will be used to categorize the transaction (e.g. rent, groceries, etc.)
-
-            public double Amount { get; set; } // this will be used to store the amount of the transaction
+        // Keeps asking until the user enters a valid positive decimal
+        static double GetValidDouble(string prompt)
+        {
+            double result;
+            Console.Write(prompt);
+            while (!double.TryParse(Console.ReadLine(), out result) || result <= 0)
+            {
+                Console.WriteLine("[!] Invalid input. Please enter a positive number (e.g. 150.00).");
+                Console.Write(prompt);
+            }
+            return result;
         }
 
 
-        //DO NOT FORGET TO MAKE IT STATIC OTHERWISE IT WONT WORK IN THE MAIN METHOD. this is because the main method is static and it can only access static members of the class. if we make the list of transactions static, then we can access it from the main method and add transactions to it.
-        static List<Transaction> _transactions = new List<Transaction>();  // this is a list that will be used to store all the transactions that the user adds. it will be used to calculate the monthly total and to view the categories.hopefully :)
-        static double maxSpendingLimit = 0; // this will store the max spending limit for the user
 
-        
-
-
-
-
-    }  
-
+        // Represents a single financial event (income or expense)
+        class Transaction
+        {
+            public int TransactionID { get; set; } // unique ID, auto-assigned
+            public string UserName { get; set; } // name of the user who added it
+            public string Type { get; set; } // "Income" or "Expense"
+            public string Category { get; set; } // e.g. "Rent", "Groceries"
+            public string Description { get; set; } // short user-provided note
+            public double Amount { get; set; } // in Rands (R)
+            public DateTime Date { get; set; } // automatically set to now
+        }
+    }
 }
